@@ -9,7 +9,7 @@ public class whenBot {
 
     public static void main(String[] args) {
         // Insert your bot's token here
-        String token = "NzQ1MTQ0MTY4MTI0MjUyMTcw.XztflQ.PpI-HyWPIPkAvQ4hLhI_zgAxh20";
+        String token = "token here";
 
         DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
 
