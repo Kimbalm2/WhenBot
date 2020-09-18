@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.ScheduledExecutorService;
 
 //Working in dev server https://discord.gg/ZrFYKa
 //Client ID 745144168124252170
@@ -16,7 +17,7 @@ import java.util.Scanner;
 
 public class WhenBot {
     //key = discord userID
-    private HashMap<String,Schedule> userSchedules = new HashMap();
+    private static userScheduleMap userSchedules = new userScheduleMap();
 
     public static void main(String[] args) {
         String token = "";
@@ -43,7 +44,7 @@ public class WhenBot {
         // Print the invite url of your bot
         System.out.println("You can invite the bot by using the following url: " + api.createBotInvite());
     }
-
+    //load token from file
     private static String getToken() throws IOException {
         // Insert your bot's token here
         String path = "resources/discordBots.txt";
@@ -57,7 +58,9 @@ public class WhenBot {
             return null;
     }
 
+    //wrapper to command methods.
     private static void onMessageCreate(MessageCreateEvent event) {
+
         if (event.getMessage().getContent().startsWith("!when")) {
             execWhen(event,event.getMessage().getContent());
         }
@@ -68,20 +71,42 @@ public class WhenBot {
 
         else if (event.getMessage().getContent().startsWith("!schedule")) {
             execSchedule(event.getMessage().getContent());
+
         }
 
         if (event.getMessage().getContent().startsWith("!update")) {
             execUpdate(event.getMessage().getContent());
         }
     }
-
+    // Command: !When {user1}
+    // Outputs all of the free times that the command executer and {user} share.
     private static void execWhen(MessageCreateEvent event, String content){ }
+
+    // Command: !setSchedule [{time1},{time2},....]
+    // input format are ranges DAYhh:mm-hh:mm,hh:mm-hh:mm,etc
+    // Prompts the user to create their weekly schedule
+
     private static void execSetSchedule(MessageCreateEvent event, String content){
+        //MON-hh:mm-hh:mm,TUE-hh:mm-hh:mm,WED-hh:mm-hh:mm,THU-hh:mm-hh:mm,FRI-hh:mm-hh:mm,SAT-hh:mm-hh:mm,SUN-hh:mm-hh:mm
         //probably just pass event to me
-        event.getChannel().sendMessage("Please enter some times you are available for the following days in 24 hour time (e.g. 0:00-23:59 = 12:00AM - 11:59PM):");
+
+        Schedule tempSchedule = new Schedule();
+
+        String[] varList = content.split(",");
+
+        for(int i = 0; i < varList.length; i++){
+            String day = varList[i].substring(0,2);
+            String time = varList[i].substring(4);
+            tempSchedule.insert(day,time);
+        }
+        userSchedules.adduser(event.getMessageAuthor().getIdAsString(), tempSchedule);
+        // TODO: https://javacord.org/wiki/basic-tutorials/using-the-messagebuilder/
+        event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + ": " + tempSchedule.printSchedule());
+
     }
     private static void execSchedule(String content){ }
     private static void execUpdate(String content){}
+
 
 
 
