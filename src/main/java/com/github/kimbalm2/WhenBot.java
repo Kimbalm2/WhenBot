@@ -46,10 +46,7 @@ public class WhenBot {
     }
     //load token from file
     private static String getToken() throws IOException {
-        // Insert your bot's token here
-        String path = "resources/discordBots.txt";
-
-            File myFile = new File(path);
+            File myFile = new File(WhenBot.class.getClassLoader().getResource("discordBots.txt").getPath());
             Scanner fileScan = new Scanner(myFile);
             while (fileScan.hasNextLine()){
                 String Line = fileScan.nextLine();
