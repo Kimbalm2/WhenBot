@@ -16,6 +16,7 @@ import java.util.Scanner;
 public class WhenBot {
     //key = discord userID
     private static userScheduleMap userSchedules = new userScheduleMap();
+    private static final String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT", "SUN"};
 
     public static void main(String[] args) {
         String token = "";
@@ -88,21 +89,32 @@ public class WhenBot {
         Schedule tempSchedule = new Schedule();
         content = getCommandParams(content);
         String[] varList = content.split(",");
-
+        String day = "";
+        String time = "";
         for (String s : varList) {
-            String day = s.substring(0, 3);
-            String time = s.substring(4);
+            if(isDay(s.substring(0,3))){
+                day = s.substring(0, 3);
+                time = s.substring(4);
+            }
+            else {
+                time = s;
+            }
             tempSchedule.insert(day, time);
         }
         userSchedules.adduser(event.getMessageAuthor().getIdAsString(), tempSchedule);
         // TODO: https://javacord.org/wiki/basic-tutorials/using-the-messagebuilder/
         event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s free time schedule: \n" + tempSchedule.printSchedule());
-
     }
     private static void execSchedule(String content){ }
     private static void execUpdate(String content){}
     private static String getCommandParams(String content){
         return content.split(" ")[1];
+    }
+    public static boolean isDay(String str){
+        for(String day : strArray){
+            if (str.equals(day)) return true;
+        }
+        return false;
     }
 
 
