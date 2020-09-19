@@ -7,14 +7,14 @@ import java.util.HashMap;
 * Days of the week are numbered starting with Sunday = 0, ending with Saturday = 6
 * */
 public class Schedule {
-    private String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT"};
-    private static HashMap<String,Integer> dayMap;
+    private String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT", "SUN"};
+    private static HashMap<String,Integer> dayMap = new HashMap<>();
     private ArrayList<String>[] week = new ArrayList[7]; //array of array lists
 
 
     public Schedule(){
-        for (ArrayList day: week) {
-            day = new ArrayList();
+        for (int i =0; i < 7; i++) {
+            week[i] = new ArrayList<>();
         }
         //Set each day string to an index number for the week list.
         //week[dayMap.get("DAY")] gets the list of times for DAY
