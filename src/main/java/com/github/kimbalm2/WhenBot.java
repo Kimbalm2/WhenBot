@@ -5,11 +5,9 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Scanner;
-import java.util.concurrent.ScheduledExecutorService;
+
 
 //Working in dev server https://discord.gg/ZrFYKa
 //Client ID 745144168124252170
@@ -88,21 +86,24 @@ public class WhenBot {
         //probably just pass event to me
 
         Schedule tempSchedule = new Schedule();
-
+        content = getCommandParams(content);
         String[] varList = content.split(",");
 
-        for(int i = 0; i < varList.length; i++){
-            String day = varList[i].substring(0,2);
-            String time = varList[i].substring(4);
-            tempSchedule.insert(day,time);
+        for (String s : varList) {
+            String day = s.substring(0, 3);
+            String time = s.substring(4);
+            tempSchedule.insert(day, time);
         }
         userSchedules.adduser(event.getMessageAuthor().getIdAsString(), tempSchedule);
         // TODO: https://javacord.org/wiki/basic-tutorials/using-the-messagebuilder/
-        event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + ": " + tempSchedule.printSchedule());
+        event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s free time schedule: \n" + tempSchedule.printSchedule());
 
     }
     private static void execSchedule(String content){ }
     private static void execUpdate(String content){}
+    private static String getCommandParams(String content){
+        return content.split(" ")[1];
+    }
 
 
 
