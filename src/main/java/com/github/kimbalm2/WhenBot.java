@@ -66,7 +66,7 @@ public class WhenBot {
         }
 
         else if (event.getMessage().getContent().startsWith("!schedule")) {
-            execSchedule(event.getMessage().getContent());
+            execSchedule(event, event.getMessage().getContent());
 
         }
 
@@ -105,16 +105,35 @@ public class WhenBot {
         // TODO: https://javacord.org/wiki/basic-tutorials/using-the-messagebuilder/
         event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s free time schedule: \n" + tempSchedule.printSchedule());
     }
-    private static void execSchedule(String content){ }
+    //**!Schedule [user]**
+    //Will output the input user's schedule. if no user is input it will output your schedule.
+    private static void execSchedule(MessageCreateEvent event, String content){
+        String args = getCommandParams(content);
+        if(getCommandParams(content) != null){
+            //todo
+        }
+        else {
+            String msg = scheduleMessageBuilder(event.getMessageAuthor().getDisplayName(),userSchedules.getUserSchedule(event.getMessageAuthor().getIdAsString()));
+            event.getChannel().sendMessage(msg);
+        }
+    }
     private static void execUpdate(String content){}
     private static String getCommandParams(String content){
-        return content.split(" ")[1];
+
+        String[] args = content.split(" ");
+
+        if(args.length > 1) return args[1];
+        else return null;
     }
     public static boolean isDay(String str){
         for(String day : strArray){
             if (str.equals(day)) return true;
         }
         return false;
+    }
+    //TODO: add styling and review wording.
+    private static String scheduleMessageBuilder(String userName, Schedule schedule){
+        return (userName + "'s free time schedule:" + schedule.printSchedule());
     }
 
 
