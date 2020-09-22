@@ -17,6 +17,10 @@ public class userScheduleMap {
         return userMap.get(id);
     }
 
+    public boolean contains (String id){
+        return userMap.containsKey(id);
+    }
+
     public void updateUserSchedule(String id, Schedule schedule){
         userMap.replace(id,schedule);
     }
