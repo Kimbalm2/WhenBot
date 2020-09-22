@@ -2,10 +2,12 @@ package com.github.kimbalm2;
 //https://javacord.org/wiki/getting-started/welcome/
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Scanner;
 
 
@@ -78,10 +80,9 @@ public class WhenBot {
     // Outputs all of the free times that the command executer and {user} share.
     private static void execWhen(MessageCreateEvent event, String content){ }
 
-    // Command: !setSchedule [{time1},{time2},....]
+    // Command: !setSchedule
     // input format are ranges DAYhh:mm-hh:mm,hh:mm-hh:mm,etc
     // Prompts the user to create their weekly schedule
-
     private static void execSetSchedule(MessageCreateEvent event, String content){
         //MON-hh:mm-hh:mm,TUE-hh:mm-hh:mm,WED-hh:mm-hh:mm,THU-hh:mm-hh:mm,FRI-hh:mm-hh:mm,SAT-hh:mm-hh:mm,SUN-hh:mm-hh:mm
         //probably just pass event to me
@@ -101,23 +102,38 @@ public class WhenBot {
             }
             tempSchedule.insert(day, time);
         }
-        userSchedules.adduser(event.getMessageAuthor().getIdAsString(), tempSchedule);
+        userSchedules.adduser(event.getMessageAuthor().getDiscriminatedName(), tempSchedule);
         // TODO: https://javacord.org/wiki/basic-tutorials/using-the-messagebuilder/
         event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s free time schedule: \n" + tempSchedule.printSchedule());
     }
     //**!Schedule [user]**
     //Will output the input user's schedule. if no user is input it will output your schedule.
     private static void execSchedule(MessageCreateEvent event, String content){
+        String msg;
         String args = getCommandParams(content);
-        if(getCommandParams(content) != null){
-            //todo
+        if(args != null){
+            Collection<User> usersCollection = event.getApi().getCachedUsersByName(args);
+            //need to change message id to username
+            if(usersCollection.size() > 0) {
+                for (User u : usersCollection) {
+                    if(userSchedules.contains(u.getDiscriminatedName())) {
+                        msg = scheduleMessageBuilder(u.getName(), userSchedules.getUserSchedule(u.getDiscriminatedName()));
+                        event.getChannel().sendMessage(msg);
+                    }
+                    else {
+                        event.getChannel().sendMessage(u.getName() + " Doesn't have a schedule set. Ask them to use the command !setSchedule.");
+                    }
+                }
+            }
         }
         else {
-            String msg = scheduleMessageBuilder(event.getMessageAuthor().getDisplayName(),userSchedules.getUserSchedule(event.getMessageAuthor().getIdAsString()));
+            msg = scheduleMessageBuilder(event.getMessageAuthor().getDisplayName(),userSchedules.getUserSchedule(event.getMessageAuthor().getDiscriminatedName()));
             event.getChannel().sendMessage(msg);
         }
     }
+
     private static void execUpdate(String content){}
+
     private static String getCommandParams(String content){
 
         String[] args = content.split(" ");
