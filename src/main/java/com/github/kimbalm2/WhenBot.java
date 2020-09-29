@@ -45,6 +45,7 @@ public class WhenBot {
         // Print the invite url of your bot
         System.out.println("You can invite the bot by using the following url: " + api.createBotInvite());
     }
+
     //load token from file
     private static String getToken() throws IOException {
             File myFile = new File(WhenBot.class.getClassLoader().getResource("discordBots.txt").getPath());
@@ -76,6 +77,7 @@ public class WhenBot {
             execUpdate(event, event.getMessage().getContent());
         }
     }
+
     // Command: !When {user1}
     // Outputs all of the free times that the command executer and {user} share.
     private static void execWhen(MessageCreateEvent event, String content){ }
@@ -90,6 +92,7 @@ public class WhenBot {
         // TODO: https://javacord.org/wiki/basic-tutorials/using-the-messagebuilder/
         event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s free time schedule: \n" + tempSchedule.printSchedule());
     }
+
     //**!Schedule [user]**
     //Will output the input user's schedule. if no user is input it will output your schedule.
     private static void execSchedule(MessageCreateEvent event, String content){
@@ -116,7 +119,16 @@ public class WhenBot {
         }
     }
 
-    private static void execUpdate(MessageCreateEvent event, String content){ }
+    private static void execUpdate(MessageCreateEvent event, String content){
+        Schedule tempSchedule = scheduleBuilder(content);
+        String id = event.getMessageAuthor().getDiscriminatedName();
+        if(!userSchedules.contains(event.getMessageAuthor().getDiscriminatedName())){
+            userSchedules.adduser(id,tempSchedule);
+        }
+        else
+        userSchedules.updateUserSchedule(id, tempSchedule);
+        event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s updated free time schedule: \n" + tempSchedule.printSchedule());
+    }
 
     //Builder to create a schedule out of a passed string from commands !update or !setSchedule
     private static Schedule scheduleBuilder (String content){
@@ -145,12 +157,14 @@ public class WhenBot {
         if(args.length > 1) return args[1];
         else return null;
     }
+
     public static boolean isDay(String str){
         for(String day : strArray){
             if (str.equals(day)) return true;
         }
         return false;
     }
+
     //TODO: add styling and review wording.
     private static String scheduleMessageBuilder(String userName, Schedule schedule){
         return (userName + "'s free time schedule:" + schedule.printSchedule());
