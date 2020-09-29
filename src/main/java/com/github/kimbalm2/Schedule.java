@@ -7,9 +7,9 @@ import java.util.HashMap;
 * Days of the week are numbered starting with Sunday = 0, ending with Saturday = 6
 * */
 public class Schedule {
-    private final String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT", "SUN"};
-    private static HashMap<String,Integer> dayMap = new HashMap<>();
-    private final ArrayList<String>[] week = new ArrayList[7]; //array of array lists
+    public final String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT", "SUN"};
+    private static HashMap<String,Integer> dayMap = new HashMap<>();//maps the weekday strings to an index in the week arrayList
+    private final ArrayList<String>[] week = new ArrayList[7]; //array of array lists uses dayMap to index them in
 
 
     public Schedule(){
@@ -26,14 +26,12 @@ public class Schedule {
     public void insert (String day, String time){
         week[dayMap.get(day)].add(time);
     }
-    //clear the day so !Update can add into the new day
-    public void clearDay (String day){
-        week[dayMap.get(day)] = new ArrayList<>();
+
+    public ArrayList<String> getTimes(String day){
+        return week[dayMap.get(day)];
     }
 
-    public void delete (String day, String time){
-        week[dayMap.get(day)].remove(time);
-    }
+    public void replaceTimes (String day, ArrayList<String> times){week[dayMap.get(day)] = times;}
 
     //TODO: store to JSON file? Need to solve persistent calendar storage issue.
     public StringBuffer printSchedule(){
