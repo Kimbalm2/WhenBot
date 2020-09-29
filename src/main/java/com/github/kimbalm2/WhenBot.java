@@ -73,7 +73,7 @@ public class WhenBot {
         }
 
         if (event.getMessage().getContent().startsWith("!update")) {
-            execUpdate(event.getMessage().getContent());
+            execUpdate(event, event.getMessage().getContent());
         }
     }
     // Command: !When {user1}
@@ -85,23 +85,7 @@ public class WhenBot {
     // Prompts the user to create their weekly schedule
     private static void execSetSchedule(MessageCreateEvent event, String content){
         //MON-hh:mm-hh:mm,TUE-hh:mm-hh:mm,WED-hh:mm-hh:mm,THU-hh:mm-hh:mm,FRI-hh:mm-hh:mm,SAT-hh:mm-hh:mm,SUN-hh:mm-hh:mm
-        //probably just pass event to me
-
-        Schedule tempSchedule = new Schedule();
-        content = getCommandParams(content);
-        String[] varList = content.split(",");
-        String day = "";
-        String time = "";
-        for (String s : varList) {
-            if(isDay(s.substring(0,3))){
-                day = s.substring(0, 3);
-                time = s.substring(4);
-            }
-            else {
-                time = s;
-            }
-            tempSchedule.insert(day, time);
-        }
+        Schedule tempSchedule = scheduleBuilder(content);
         userSchedules.adduser(event.getMessageAuthor().getDiscriminatedName(), tempSchedule);
         // TODO: https://javacord.org/wiki/basic-tutorials/using-the-messagebuilder/
         event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s free time schedule: \n" + tempSchedule.printSchedule());
@@ -132,7 +116,27 @@ public class WhenBot {
         }
     }
 
-    private static void execUpdate(String content){}
+    private static void execUpdate(MessageCreateEvent event, String content){ }
+
+    //Builder to create a schedule out of a passed string from commands !update or !setSchedule
+    private static Schedule scheduleBuilder (String content){
+        Schedule tempSchedule = new Schedule();
+        content = getCommandParams(content);
+        String[] varList = content.split(",");
+        String day = "";
+        String time = "";
+        for (String s : varList) {
+            if(isDay(s.substring(0,3))){
+                day = s.substring(0, 3);
+                time = s.substring(4);
+            }
+            else {
+                time = s;
+            }
+            tempSchedule.insert(day, time);
+        }
+        return tempSchedule;
+    }
 
     private static String getCommandParams(String content){
 
