@@ -22,6 +22,12 @@ public class userScheduleMap {
     }
 
     public void updateUserSchedule(String id, Schedule schedule){
-        userMap.replace(id,schedule);
+        Schedule oldSchedule = userMap.get(id);
+        for (String day: schedule.strArray) {
+            if (schedule.getTimes(day).size() > 0){
+                oldSchedule.replaceTimes(day,schedule.getTimes(day));
+            }
+        }
+        userMap.replace(id,oldSchedule);
     }
 }
