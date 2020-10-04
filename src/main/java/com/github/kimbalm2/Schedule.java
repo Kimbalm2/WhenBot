@@ -1,6 +1,7 @@
 package com.github.kimbalm2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 /*
@@ -31,7 +32,10 @@ public class Schedule {
         return week[dayMap.get(day)];
     }
 
-    public void replaceTimes (String day, ArrayList<String> times){week[dayMap.get(day)] = times;}
+    public void replaceTimes (String day, ArrayList<String> times){
+        week[dayMap.get(day)] = times;
+        sortSchedule();
+    }
 
     //TODO: store to JSON file? Need to solve persistent calendar storage issue.
     public StringBuffer printSchedule(){
@@ -44,6 +48,12 @@ public class Schedule {
             message.append('\n');
         }
         return message;
+    }
+
+    public void sortSchedule(){
+        for (String day: strArray) {
+            Collections.sort(week[dayMap.get(day)]);
+        }
     }
 
 
