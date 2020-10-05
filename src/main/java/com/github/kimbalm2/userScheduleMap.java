@@ -21,13 +21,13 @@ public class userScheduleMap {
         return userMap.containsKey(id);
     }
 
-    public void updateUserSchedule(String id, Schedule schedule){
+    public void updateUserSchedule(String id, Schedule newDaySchedule){
         Schedule oldSchedule = userMap.get(id);
-        for (String day: schedule.strArray) {
-            if (schedule.getTimes(day).size() > 0){
-                oldSchedule.replaceTimes(day,schedule.getTimes(day));
+        for (String day: newDaySchedule.strArray) {
+            if (newDaySchedule.getTimes(day).size() > 0){
+                oldSchedule.replaceTimes(day,newDaySchedule.getTimes(day));
             }
         }
-        userMap.replace(id,oldSchedule);
+        userMap.replace(id,oldSchedule);//NOTE: this may not be neccesary due to the pointer to userMap(id) = oldSchedule.
     }
 }
