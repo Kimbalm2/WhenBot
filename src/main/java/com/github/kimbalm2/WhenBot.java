@@ -80,7 +80,11 @@ public class WhenBot {
 
     // Command: !When {user1}
     // Outputs all of the free times that the command executer and {user} share.
-    private static void execWhen(MessageCreateEvent event, String content){ }
+    private static void execWhen(MessageCreateEvent event, String content){
+        //get both user's schedules
+        //for each day perform the following algorithm:
+        //https://www.geeksforgeeks.org/find-intersection-of-intervals-given-by-two-lists/
+    }
 
     // Command: !setSchedule
     // input format are ranges DAYhh:mm-hh:mm,hh:mm-hh:mm,etc
@@ -127,7 +131,7 @@ public class WhenBot {
         }
         else
         userSchedules.updateUserSchedule(id, tempSchedule);
-        event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s updated free time schedule: \n" + tempSchedule.printSchedule());
+        event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s updated free time schedule: \n" + userSchedules.getUserSchedule(id).printSchedule());
     }
 
     //Builder to create a schedule out of a passed string from commands !update or !setSchedule
@@ -146,6 +150,7 @@ public class WhenBot {
                 time = s;
             }
             tempSchedule.insert(day, time);
+            tempSchedule.sortSchedule();
         }
         return tempSchedule;
     }
