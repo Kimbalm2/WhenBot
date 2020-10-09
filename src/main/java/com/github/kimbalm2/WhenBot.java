@@ -80,10 +80,52 @@ public class WhenBot {
 
     // Command: !When {user1}
     // Outputs all of the free times that the command executer and {user} share.
+    //get both user's schedules
+
     private static void execWhen(MessageCreateEvent event, String content){
-        //get both user's schedules
-        //for each day perform the following algorithm:
-        //https://www.geeksforgeeks.org/find-intersection-of-intervals-given-by-two-lists/
+        String[] userList;
+        String otherUser;
+        String otherUserDisplayName;
+        Schedule otherUserSchedule = new Schedule();//the user passed in as an argument to the !when command.
+        Schedule superUserSchedule = new Schedule();
+        Collection<User> usersCollection;
+        content = getCommandParams(content);
+        userList = content.split(" ");
+
+        if(userList.length == 1){
+            otherUser = userList[0];
+            usersCollection = event.getApi().getCachedUsersByName(otherUser);
+            //get the other otherUser
+            if(usersCollection.size() > 0) {
+                for (User u : usersCollection) {
+                    otherUserDisplayName = u.getDisplayName(event.getServer().get());
+                    if(otherUserDisplayName.equals(otherUser) && userSchedules.contains(otherUserDisplayName)) {
+                        otherUserSchedule = userSchedules.getUserSchedule(u.getDiscriminatedName());
+                    }
+                    else {
+                        //TODO: send error message to server
+                        return;
+                    }
+                }
+            }
+            else{
+                //TODO: send error message to server
+                return;
+            }
+            if(userSchedules.contains(event.getMessageAuthor().getDiscriminatedName())){
+                superUserSchedule = userSchedules.getUserSchedule(event.getMessageAuthor().getDiscriminatedName());
+            }
+            else {
+                //TODO: send error message to server.
+                return;
+            }
+            Schedule sameFreeTimes = findScheduleIntersection(superUserSchedule,otherUserSchedule);
+            StringBuffer msg = new StringBuffer("User's " + event.getMessageAuthor().getDisplayName() + " and " + otherUser + " are both free at the following times this week:\n");
+            msg.append(sameFreeTimes.printSchedule());
+            event.getChannel().sendMessage(msg.toString());
+        }
+        //TODO: handle multiple users?
+
     }
 
     // Command: !setSchedule
@@ -132,6 +174,16 @@ public class WhenBot {
         else
         userSchedules.updateUserSchedule(id, tempSchedule);
         event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s updated free time schedule: \n" + userSchedules.getUserSchedule(id).printSchedule());
+    }
+
+    //for each day perform the following algorithm:
+    //https://www.geeksforgeeks.org/find-intersection-of-intervals-given-by-two-lists/
+    //Maintain two pointers i and j to traverse the two interval lists, arr1 and arr2 respectively.
+    //Now, if arr1[i] has smallest endpoint, it can only intersect with arr2[j]. Similarly, if arr2[j] has smallest endpoint, it can only intersect with arr1[i]. If intersection occurs, find the intersecting segment.
+    //[l, r] will be the intersecting segment iff l <= r, where l = max(arr1[i][0], arr2[j][0]) and r = min(arr1[i][1], arr2[j][1]).
+    //Increment the i and j pointers accordingly to move ahead.
+    private static Schedule findScheduleIntersection(Schedule s1, Schedule s2){
+        return null;
     }
 
     //Builder to create a schedule out of a passed string from commands !update or !setSchedule
