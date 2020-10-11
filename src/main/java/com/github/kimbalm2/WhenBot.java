@@ -7,6 +7,7 @@ import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Scanner;
 
@@ -183,7 +184,38 @@ public class WhenBot {
     //[l, r] will be the intersecting segment iff l <= r, where l = max(arr1[i][0], arr2[j][0]) and r = min(arr1[i][1], arr2[j][1]).
     //Increment the i and j pointers accordingly to move ahead.
     private static Schedule findScheduleIntersection(Schedule s1, Schedule s2){
-        return null;
+        timeInterval t1,t2;
+        String[] s1Arr;
+        String[] s2Arr;
+        Schedule tempSchedule = new Schedule();
+        boolean foundIntersection = false;
+        for (String day: s1.strArray) {
+            int i = 0;
+            int j = 0;
+            ArrayList<String> arr1 = s1.getTimes(day);
+            ArrayList<String> arr2 = s2.getTimes(day);
+            int n = arr1.size();
+            int m = arr2.size();
+            while (i < n && j < m)
+            {
+                s1Arr = arr1.get(i).split("-");
+                s2Arr = arr2.get(j).split("-");
+                t1 = new timeInterval(s1Arr[0],s1Arr[1]);
+                t2 = new timeInterval(s2Arr[0],s2Arr[1]);
+                if (t1.doesIntersect(t2)){
+                    foundIntersection = true;
+                    tempSchedule.insert(day,t1.getIntersection(t2).toString());
+                }
+                if (t1.end < t2.end)
+                    i++;
+                else
+                    j++;
+            }
+        }
+        if (foundIntersection)
+            return tempSchedule;
+        else
+            return null;
     }
 
     //Builder to create a schedule out of a passed string from commands !update or !setSchedule
