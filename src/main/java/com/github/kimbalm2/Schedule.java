@@ -27,6 +27,9 @@ public class Schedule {
     public void insert (String day, String time){
         week[dayMap.get(day)].add(time);
     }
+    public void remove (String day, String time){
+        week[dayMap.get(day)].remove(time);
+    }
 
     public ArrayList<String> getTimes(String day){
         return week[dayMap.get(day)];
