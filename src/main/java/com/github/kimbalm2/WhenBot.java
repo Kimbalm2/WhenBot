@@ -30,19 +30,15 @@ public class WhenBot {
             System.out.println("The token file could not be read. Please contact discord bot admins for the token.");
             System.exit(0);
         }
-
         DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
-
         // TODO
         api.addMessageCreateListener(WhenBot::onMessageCreate);
-
         // Add a listener which answers with "Pong!" if someone writes "!ping"
         api.addMessageCreateListener(event -> {
             if (event.getMessage().getContent().equalsIgnoreCase("!ping")) {
                 event.getChannel().sendMessage("Pong!");
             }
         });
-
         // Print the invite url of your bot
         System.out.println("You can invite the bot by using the following url: " + api.createBotInvite());
     }
@@ -74,9 +70,47 @@ public class WhenBot {
 
         }
 
-        if (event.getMessage().getContent().startsWith("!update")) {
+        else if (event.getMessage().getContent().startsWith("!update")) {
             execUpdate(event, event.getMessage().getContent());
         }
+        else if (event.getMessage().getContent().startsWith("!addTimes")) {
+            execAddTimes(event, event.getMessage().getContent());
+        }
+        else if (event.getMessage().getContent().startsWith("!removeTimes")) {
+            execRemoveTimes(event, event.getMessage().getContent());
+        }
+
+    }
+
+    //!removeTimes DAY hh:mm-hh:mm,hh:mm-hhmm
+    private static void execRemoveTimes(MessageCreateEvent event, String content) {
+        String day;
+        String discriminatedName;
+        Schedule userSchedule;
+        discriminatedName = event.getMessageAuthor().getDiscriminatedName();
+        String[] args = getArgs(content);
+        day = args[1];
+        userSchedule = userSchedules.getUserSchedule(discriminatedName);
+        for(int i = 2; i < args.length; i++){
+            userSchedule.remove(day,args[i]);
+        }
+        userSchedule.sortSchedule();
+        userSchedules.updateUserSchedule(discriminatedName, userSchedule);
+    }
+    //!addTimes DAY hh:mm-hh:mm,hh:mm-hh:mm
+    private static void execAddTimes(MessageCreateEvent event, String content) {
+        String day;
+        String discriminatedName;
+        Schedule userSchedule;
+        discriminatedName = event.getMessageAuthor().getDiscriminatedName();
+        String[] args = getArgs(content);
+        day = args[1];
+        userSchedule = userSchedules.getUserSchedule(discriminatedName);
+        for(int i = 2; i < args.length; i++){
+            userSchedule.insert(day,args[i]);
+        }
+        userSchedule.sortSchedule();
+        userSchedules.updateUserSchedule(discriminatedName, userSchedule);
     }
 
     // Command: !When {user1}
@@ -90,9 +124,15 @@ public class WhenBot {
         Schedule otherUserSchedule = new Schedule();//the user passed in as an argument to the !when command.
         Schedule superUserSchedule = new Schedule();
         Collection<User> usersCollection;
-        content = getCommandParams(content);
+        String[] args;
+        args = getArgs(content);
+        if (args != null)
+            content = args[1];
+        else{
+            event.getChannel().sendMessage("No user entered, please enter one or more users after the command e.g.'!when user1 user2 etc.'");
+            return;
+        }
         userList = content.split(" ");
-
         if(userList.length == 1){
             otherUser = userList[0];
             usersCollection = event.getApi().getCachedUsersByName(otherUser);
@@ -151,9 +191,13 @@ public class WhenBot {
     //Will output the input user's schedule. if no user is input it will output your schedule.
     private static void execSchedule(MessageCreateEvent event, String content){
         String msg;
-        String args = getCommandParams(content);
+        String user;
+        String[] args;
+
+        args = getArgs(content);
         if(args != null){
-            Collection<User> usersCollection = event.getApi().getCachedUsersByName(args);
+            user = args[1];
+            Collection<User> usersCollection = event.getApi().getCachedUsersByName(user);
             //need to change message id to username
             if(usersCollection.size() > 0) {
                 for (User u : usersCollection) {
@@ -228,10 +272,19 @@ public class WhenBot {
     //Builder to create a schedule out of a passed string from commands !update or !setSchedule
     private static Schedule scheduleBuilder (String content){
         Schedule tempSchedule = new Schedule();
-        content = getCommandParams(content);
-        String[] varList = content.split(",");
         String day = "";
         String time = "";
+        String[] varList;
+        String[] args;
+
+        args = getArgs(content);
+        if (args != null)
+        content = args[1];
+        else{
+            return null;
+        }
+        varList = content.split(",");
+
         for (String s : varList) {
             if(isDay(s.substring(0,3))){
                 day = s.substring(0, 3);
@@ -241,17 +294,18 @@ public class WhenBot {
                 time = s;
             }
             tempSchedule.insert(day, time);
-            tempSchedule.sortSchedule();
         }
+        tempSchedule.sortSchedule();
         return tempSchedule;
     }
 
-    private static String getCommandParams(String content){
-
+    private static String[] getArgs(String content) {
         String[] args = content.split(" ");
-
-        if(args.length > 1) return args[1];
-        else return null;
+        if (args.length > 1) {
+           return args;
+        } else {
+            return null;//return null if only a command was passed.
+        }
     }
 
     public static boolean isDay(String str){
