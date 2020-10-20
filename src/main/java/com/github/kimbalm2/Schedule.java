@@ -9,7 +9,7 @@ import java.util.HashMap;
 * */
 public class Schedule {
     public final String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT", "SUN"};
-    private static HashMap<String,Integer> dayMap = new HashMap<>();//maps the weekday strings to an index in the week arrayList
+    private final static HashMap<String,Integer> dayMap = new HashMap<>();//maps the weekday strings to an index in the week arrayList
     private final ArrayList<String>[] week = new ArrayList[7]; //array of array lists uses dayMap to index them in
 
 
@@ -44,9 +44,11 @@ public class Schedule {
     public StringBuffer printSchedule(){
         StringBuffer message = new StringBuffer();
         for (int i = 0; i < 7; i++) {
-            message.append(strArray[i] + ": ");
+            message.append(strArray[i]);
+            message.append(": ");
             for (String time : week[i]) {
-                message.append(time + " ");
+                message.append(time);
+                message.append(" ");
             }
             message.append('\n');
         }
