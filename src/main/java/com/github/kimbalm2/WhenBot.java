@@ -2,6 +2,7 @@ package com.github.kimbalm2;
 //https://javacord.org/wiki/getting-started/welcome/
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 
@@ -79,7 +80,37 @@ public class WhenBot {
         else if (event.getMessage().getContent().startsWith("!removeTimes")) {
             execRemoveTimes(event, event.getMessage().getContent());
         }
+        else if (event.getMessage().getContent().startsWith("!help")) {
+            execHelp(event);
+        }
 
+
+    }
+
+    private static void execHelp(MessageCreateEvent event){
+        new MessageBuilder()
+                .append("when: This command will output all of the free times that X users share.\n" +
+                        "Usage:  !when user1 user2 userX")
+                .appendNewLine()
+                .append("update: Allows you to update the input day's set of free times. " +
+                        "Note this will overwrite the whole schedule for the days entered.  " +
+                        "Use addTimes or removeTimes if you want to make small changes to a day.\n" +
+                        "Usage: !update WED-04:00-05:00")
+                .appendNewLine()
+                .append("setSchedule: Create your new weekly set of free times. Time format is 24 hour time. Days are shortened to the first three letters.\n" +
+                        "Format: !setSchedule DAY-HH:mm-HH:mm,HH:mm-HH:mm,DAY-HH:mm-HH:mm\n"+
+                        "Usage: !setSchedule MON-19:00-21:00,09:00-11:00,TUE-19:00-21:00,THU-19:00-21:00,")
+                .appendNewLine()
+                .append("Schedule: Will output the input user's schedule. if no user is input it will output your schedule.\n" +
+                        "Usage: !schedule userName")
+                .appendNewLine()
+                .append("addTimes: Add free times to DAY\n" +
+                        "Usage: !addTimes SAT 09:00-12:00,17:00-19:00")
+                .appendNewLine()
+                .append("removeTimes: remove free times from DAY\n" +
+                        "Usage: !removeTimes SAT 09:00-12:00,17:00-19:00")
+                .appendNewLine()
+                .send(event.getChannel());
     }
 
     //!removeTimes DAY hh:mm-hh:mm,hh:mm-hhmm
@@ -177,7 +208,7 @@ public class WhenBot {
     }
 
     // Command: !setSchedule
-    // input format are ranges DAYhh:mm-hh:mm,hh:mm-hh:mm,etc
+    // input format are ranges DAYhh:mm-hh:mm,hh:mm-hh:mm,DAYhh:mm,hh:mm-hh:mm
     // Prompts the user to create their weekly schedule
     private static void execSetSchedule(MessageCreateEvent event, String content){
         //MON-hh:mm-hh:mm,TUE-hh:mm-hh:mm,WED-hh:mm-hh:mm,THU-hh:mm-hh:mm,FRI-hh:mm-hh:mm,SAT-hh:mm-hh:mm,SUN-hh:mm-hh:mm
