@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Scanner;
 
 
@@ -46,7 +47,8 @@ public class WhenBot {
 
     //load token from file
     private static String getToken() throws IOException {
-            File myFile = new File(WhenBot.class.getClassLoader().getResource("discordBots.txt").getPath());
+        String path = Objects.requireNonNull(WhenBot.class.getClassLoader().getResource("discordBots.txt")).getPath();
+            File myFile = new File(path);
             Scanner fileScan = new Scanner(myFile);
             while (fileScan.hasNextLine()){
                 String Line = fileScan.nextLine();
@@ -113,20 +115,25 @@ public class WhenBot {
                 .send(event.getChannel());
     }
 
-    //!removeTimes DAY hh:mm-hh:mm,hh:mm-hhmm
+    //!removeTimes DAY hh:mm-hh:mm,hh:mm-hh:mm
     private static void execRemoveTimes(MessageCreateEvent event, String content) {
         String day;
         String discriminatedName;
         Schedule userSchedule;
         discriminatedName = event.getMessageAuthor().getDiscriminatedName();
         String[] args = getArgs(content);
-        day = args[1];
-        userSchedule = userSchedules.getUserSchedule(discriminatedName);
-        for(int i = 2; i < args.length; i++){
-            userSchedule.remove(day,args[i]);
+        if (args != null){
+            day = args[1];
+            userSchedule = userSchedules.getUserSchedule(discriminatedName);
+            for(int i = 2; i < args.length; i++){
+                userSchedule.remove(day,args[i]);
+            }
+            userSchedule.sortSchedule();
+            userSchedules.updateUserSchedule(discriminatedName, userSchedule);
         }
-        userSchedule.sortSchedule();
-        userSchedules.updateUserSchedule(discriminatedName, userSchedule);
+        else{
+            event.getChannel().sendMessage("Please include the DAY and at least one time, for example: !removeTimes MON 09:00-10:00");
+        }
     }
     //!addTimes DAY hh:mm-hh:mm,hh:mm-hh:mm
     private static void execAddTimes(MessageCreateEvent event, String content) {
@@ -135,17 +142,23 @@ public class WhenBot {
         Schedule userSchedule;
         discriminatedName = event.getMessageAuthor().getDiscriminatedName();
         String[] args = getArgs(content);
-        day = args[1];
-        userSchedule = userSchedules.getUserSchedule(discriminatedName);
-        for(int i = 2; i < args.length; i++){
-            userSchedule.insert(day,args[i]);
+        if(args != null){
+            day = args[1];
+            userSchedule = userSchedules.getUserSchedule(discriminatedName);
+            for(int i = 2; i < args.length; i++){
+                userSchedule.insert(day,args[i]);
+            }
+            userSchedule.sortSchedule();
+            userSchedules.updateUserSchedule(discriminatedName, userSchedule);
         }
-        userSchedule.sortSchedule();
-        userSchedules.updateUserSchedule(discriminatedName, userSchedule);
+        else{
+            event.getChannel().sendMessage("Please include the DAY and at least one time, for example:!addTimes MON 09:00-10:00");
+        }
+
     }
 
     // Command: !When {user1}
-    // Outputs all of the free times that the command executer and {user} share.
+    // Outputs all of the free times that the command invoker and {user} share.
     //get both user's schedules
 
     private static void execWhen(MessageCreateEvent event, String content){
@@ -153,7 +166,7 @@ public class WhenBot {
         String otherUser;
         String otherUserDisplayName;
         Schedule otherUserSchedule = new Schedule();//the user passed in as an argument to the !when command.
-        Schedule superUserSchedule = new Schedule();
+        Schedule superUserSchedule;
         Collection<User> usersCollection;
         String[] args;
         args = getArgs(content);
@@ -199,9 +212,7 @@ public class WhenBot {
                 event.getChannel().sendMessage("The two users do not share any free times.");
             }
             else{
-                StringBuffer msg = new StringBuffer("User's " + event.getMessageAuthor().getDisplayName() + " and " + otherUser + " are both free at the following times this week:\n");
-                msg.append(sameFreeTimes.printSchedule());
-                event.getChannel().sendMessage(msg.toString());
+                event.getChannel().sendMessage("User's " + event.getMessageAuthor().getDisplayName() + " and " + otherUser + " are both free at the following times this week:\n" + sameFreeTimes.printSchedule());
             }
         }
         //TODO: handle multiple users?
@@ -250,6 +261,8 @@ public class WhenBot {
 
     private static void execUpdate(MessageCreateEvent event, String content){
         Schedule tempSchedule = scheduleBuilder(content);
+        if (tempSchedule == null)
+            tempSchedule = new Schedule();
         String id = event.getMessageAuthor().getDiscriminatedName();
         if(!userSchedules.contains(event.getMessageAuthor().getDiscriminatedName())){
             userSchedules.adduser(id,tempSchedule);
@@ -304,7 +317,7 @@ public class WhenBot {
     private static Schedule scheduleBuilder (String content){
         Schedule tempSchedule = new Schedule();
         String day = "";
-        String time = "";
+        String time;
         String[] varList;
         String[] args;
 
