@@ -28,6 +28,6 @@ public class userScheduleMap {
                 oldSchedule.replaceTimes(day,newDaySchedule.getTimes(day));
             }
         }
-        userMap.replace(id,oldSchedule);//NOTE: this may not be neccesary due to the pointer to userMap(id) = oldSchedule.
+        userMap.replace(id,oldSchedule);//NOTE: this may not be necessary due to the pointer to userMap(id) = oldSchedule.
     }
 }
