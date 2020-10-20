@@ -92,16 +92,16 @@ public class WhenBot {
                 .append("when: This command will output all of the free times that X users share.\n" +
                         "Usage:  !when user1 user2 userX")
                 .appendNewLine()
-                .append("update: Allows you to update the input day's set of free times. " +
-                        "Note this will overwrite the whole schedule for the days entered.  " +
-                        "Use addTimes or removeTimes if you want to make small changes to a day.\n" +
-                        "Usage: !update WED-04:00-05:00")
-                .appendNewLine()
                 .append("setSchedule: Create your new weekly set of free times. Time format is 24 hour time. Days are shortened to the first three letters.\n" +
                         "Format: !setSchedule DAY-HH:mm-HH:mm,HH:mm-HH:mm,DAY-HH:mm-HH:mm\n"+
                         "Usage: !setSchedule MON-19:00-21:00,09:00-11:00,TUE-19:00-21:00,THU-19:00-21:00,")
                 .appendNewLine()
-                .append("Schedule: Will output the input user's schedule. if no user is input it will output your schedule.\n" +
+                .append("update: Allows you to update the input day's set of free times. " +
+                        "Note this will overwrite the whole schedule for the days entered.  " +
+                        "Use addTimes or removeTimes if you want to make small changes to a single day.\n" +
+                        "Usage: !update WED-04:00-05:00,TUE-19:00-20:00")
+                .appendNewLine()
+                .append("Schedule: Will output the input user's set of free times. if no user is input it will output your schedule.\n" +
                         "Usage: !schedule userName")
                 .appendNewLine()
                 .append("addTimes: Add free times to DAY\n" +
@@ -317,6 +317,7 @@ public class WhenBot {
         varList = content.split(",");
 
         for (String s : varList) {
+            //determine if we are dealing with a new day or still in the current day.
             if(isDay(s.substring(0,3))){
                 day = s.substring(0, 3);
                 time = s.substring(4);
