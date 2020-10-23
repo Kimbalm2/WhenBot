@@ -4,19 +4,6 @@ A Discord bot that keeps track of when your freinds are available. Whether you u
 ## Motivation
 My friends and I work very different schedules so it can be hard to find times where we are all free. One works for an Airline, so his free time can change randomly. Another works at a restaurant so his schedule will change every week. and I work a typical 9-5. I wanted to make something we could use that would keep track of our availabilty, that way we can stop blasting our group chats and just ask my bot.
 
-
-## Screenshots
-TODO: demo screenshot 
-
-## Tech used
-<b>Built with</b>
-- Java
-- [Javacord Library](https://javacord.org/wiki/#structure-of-the-wiki) For easy interfacing with the Discord API
-  - [Discord API] (https://discord.com/developers/docs/topics/certified-devices) 
-- IntelliJ
-- Gradle
-
-
 ## How to use?
 - Invite my bot to your server: (Comming Soon!)
 
@@ -50,6 +37,18 @@ TODO: demo screenshot
 	Example: !removeTimes MON 19:00-21:00
   
   <b>!help:</b> Forgot how to use the bot? Ask it for help!
+  
+  
+## Screenshots
+Coming Soon!
+
+## Tech used
+<b>Built with</b>
+- Java
+- [Javacord Library](https://javacord.org/wiki/#structure-of-the-wiki) For easy interfacing with the Discord API
+  - [Discord API] (https://discord.com/developers/docs/topics/certified-devices) 
+- IntelliJ
+- Gradle
 
 ## Future Work
 - I would like to improve the usability of the setSchedule and update commands to be nicer than having to enter a single long string as your schedule. 
