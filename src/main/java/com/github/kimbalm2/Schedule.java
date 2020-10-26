@@ -25,10 +25,13 @@ public class Schedule {
     }
 
     public void insert (String day, String time){
+        if(isValid(time))
         week[dayMap.get(day)].add(time);
     }
     public void remove (String day, String time){
-        week[dayMap.get(day)].remove(time);
+        if(week[dayMap.get(day)].contains(time)) {
+            week[dayMap.get(day)].remove(time);
+        }
     }
 
     public ArrayList<String> getTimes(String day){
@@ -59,6 +62,10 @@ public class Schedule {
         for (String day: strArray) {
             Collections.sort(week[dayMap.get(day)]);
         }
+    }
+    //TODO: implement a time checker
+    private boolean isValid (String time){
+        return true;
     }
 
 
