@@ -172,7 +172,7 @@ public class WhenBot {
 
     private static void execWhen(MessageCreateEvent event, String content){
         String[] userList;
-        String otherUser;
+        Schedule sameFreeTimes = null;
         String otherUserDisplayName;
         Schedule otherUserSchedule = new Schedule();//the user passed in as an argument to the !when command.
         Schedule superUserSchedule;
@@ -187,44 +187,46 @@ public class WhenBot {
         }
         userList = content.split(" ");
         //if we are only comparing with on other person.
-        if(userList.length == 1){
-            otherUser = userList[0];
-            usersCollection = event.getApi().getCachedUsersByName(otherUser);
-            //get the other otherUser
-            if(usersCollection.size() > 0) {
-                for (User u : usersCollection) {
-                    otherUserDisplayName = u.getDisplayName(event.getServer().get());//TODO: fix warning
-                    if(otherUserDisplayName.equals(otherUser) && userSchedules.contains(otherUserDisplayName)) {
-                        otherUserSchedule = userSchedules.getUserSchedule(u.getDiscriminatedName());
-                    }
-                    else {
-                        event.getChannel().sendMessage(otherUserDisplayName + " does not have a schedule set.");
-                        return;
+        if(userList.length >= 1){
+            for (String otherUser: userList) {
+                usersCollection = event.getApi().getCachedUsersByName(otherUser);
+                //get the other otherUser
+                if(usersCollection.size() > 0) {
+                    for (User u : usersCollection) {
+                        otherUserDisplayName = u.getDisplayName(event.getServer().get());//TODO: fix warning
+                        if(otherUserDisplayName.equals(otherUser) && userSchedules.contains(otherUserDisplayName)) {
+                            otherUserSchedule = userSchedules.getUserSchedule(u.getDiscriminatedName());
+                        }
+                        else {
+                            event.getChannel().sendMessage(otherUserDisplayName + " does not have a schedule set.");
+                            return;
+                        }
                     }
                 }
-            }
-            else{
-                //TODO: send error message to server
-                event.getChannel().sendMessage("Can't find a user with the username " + otherUser);
-                return;
-            }
-            if(userSchedules.contains(event.getMessageAuthor().getDiscriminatedName())){
-                superUserSchedule = userSchedules.getUserSchedule(event.getMessageAuthor().getDiscriminatedName());
-            }
-            else {
-                //TODO: send error message to server.
-                event.getChannel().sendMessage("You do no have a free time schedule set. Please set a schedule before using this command.");
-                return;
-            }
-            Schedule sameFreeTimes = findScheduleIntersection(superUserSchedule,otherUserSchedule);
-            if(sameFreeTimes == null){
-                event.getChannel().sendMessage("The two users do not share any free times.");
-            }
-            else{
-                event.getChannel().sendMessage("User's " + event.getMessageAuthor().getDisplayName() + " and " + otherUser + " are both free at the following times this week:\n" + sameFreeTimes.printSchedule());
+                else{
+                    //TODO: send error message to server
+                    event.getChannel().sendMessage("Can't find a user with the username " + otherUser);
+                    return;
+                }
+                if(userSchedules.contains(event.getMessageAuthor().getDiscriminatedName()) && sameFreeTimes == null){
+                    superUserSchedule = userSchedules.getUserSchedule(event.getMessageAuthor().getDiscriminatedName());
+                }
+                else if(sameFreeTimes != null){
+                    superUserSchedule = sameFreeTimes;
+                }
+                else {
+                    //TODO: send error message to server.
+                    event.getChannel().sendMessage("You do no have a free time schedule set. Please set a schedule before using this command.");
+                    return;
+                }
+                sameFreeTimes = findScheduleIntersection(superUserSchedule,otherUserSchedule);
+                if(sameFreeTimes == null){
+                    event.getChannel().sendMessage("The users do not share any free times.");
+                }
             }
         }
-        //TODO: handle multiple users?
+        event.getChannel().sendMessage("The Users are all free at the following times this week:\n"
+                                        + sameFreeTimes.printSchedule());
     }
 
     // Command: !setSchedule
