@@ -4,6 +4,7 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.user.User;
+import org.javacord.api.event.Event;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.io.File;
@@ -124,6 +125,10 @@ public class WhenBot {
         String[] args = getArgs(content);
         if (args != null){
             day = args[1];
+            if (!isDay(day)){
+                event.getChannel().sendMessage("Please include a valid day of the week. (MON, TUE, WED, THU, FRI, SAT, SUN)");
+                return;
+            }
             userSchedule = userSchedules.getUserSchedule(discriminatedName);
             for(int i = 2; i < args.length; i++){
                 userSchedule.remove(day,args[i]);
@@ -144,6 +149,10 @@ public class WhenBot {
         String[] args = getArgs(content);
         if(args != null){
             day = args[1];
+            if (!isDay(day)){
+                event.getChannel().sendMessage("Please include a valid day of the week. (MON, TUE, WED, THU, FRI, SAT, SUN)");
+                return;
+            }
             userSchedule = userSchedules.getUserSchedule(discriminatedName);
             for(int i = 2; i < args.length; i++){
                 userSchedule.insert(day,args[i]);
@@ -177,18 +186,18 @@ public class WhenBot {
             return;
         }
         userList = content.split(" ");
+        //if we are only comparing with on other person.
         if(userList.length == 1){
             otherUser = userList[0];
             usersCollection = event.getApi().getCachedUsersByName(otherUser);
             //get the other otherUser
             if(usersCollection.size() > 0) {
                 for (User u : usersCollection) {
-                    otherUserDisplayName = u.getDisplayName(event.getServer().get());
+                    otherUserDisplayName = u.getDisplayName(event.getServer().get());//TODO: fix warning
                     if(otherUserDisplayName.equals(otherUser) && userSchedules.contains(otherUserDisplayName)) {
                         otherUserSchedule = userSchedules.getUserSchedule(u.getDiscriminatedName());
                     }
                     else {
-                        //TODO: send error message to server
                         event.getChannel().sendMessage(otherUserDisplayName + " does not have a schedule set.");
                         return;
                     }
@@ -223,7 +232,10 @@ public class WhenBot {
     // Prompts the user to create their weekly schedule
     private static void execSetSchedule(MessageCreateEvent event, String content){
         //MON-hh:mm-hh:mm,TUE-hh:mm-hh:mm,WED-hh:mm-hh:mm,THU-hh:mm-hh:mm,FRI-hh:mm-hh:mm,SAT-hh:mm-hh:mm,SUN-hh:mm-hh:mm
-        Schedule tempSchedule = scheduleBuilder(content);
+        Schedule tempSchedule = scheduleBuilder(content, event);
+        if (tempSchedule == null){
+            return;
+        }
         userSchedules.adduser(event.getMessageAuthor().getDiscriminatedName(), tempSchedule);
         // TODO: https://javacord.org/wiki/basic-tutorials/using-the-messagebuilder/
         event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s free time schedule: \n" + tempSchedule.printSchedule());
@@ -260,15 +272,16 @@ public class WhenBot {
     }
 
     private static void execUpdate(MessageCreateEvent event, String content){
-        Schedule tempSchedule = scheduleBuilder(content);
+        Schedule tempSchedule = scheduleBuilder(content, event);
         if (tempSchedule == null)
             tempSchedule = new Schedule();
         String id = event.getMessageAuthor().getDiscriminatedName();
         if(!userSchedules.contains(event.getMessageAuthor().getDiscriminatedName())){
             userSchedules.adduser(id,tempSchedule);
         }
-        else
-        userSchedules.updateUserSchedule(id, tempSchedule);
+        else {
+            userSchedules.updateUserSchedule(id, tempSchedule);
+        }
         event.getChannel().sendMessage(event.getMessageAuthor().getDisplayName() + "'s updated free time schedule: \n" + userSchedules.getUserSchedule(id).printSchedule());
     }
 
@@ -314,7 +327,7 @@ public class WhenBot {
     }
 
     //Builder to create a schedule out of a passed string from commands !update or !setSchedule
-    private static Schedule scheduleBuilder (String content){
+    private static Schedule scheduleBuilder (String content, MessageCreateEvent event){
         Schedule tempSchedule = new Schedule();
         String day = "";
         String time;
@@ -325,6 +338,7 @@ public class WhenBot {
         if (args != null)
         content = args[1];
         else{
+            event.getChannel().sendMessage("Please include at least one DAY and at least one time, for example:!addTimes MON-09:00-10:00");
             return null;
         }
         varList = content.split(",");
@@ -333,6 +347,10 @@ public class WhenBot {
             //determine if we are dealing with a new day or still in the current day.
             if(isDay(s.substring(0,3))){
                 day = s.substring(0, 3);
+                if (!isDay(day)){
+                    event.getChannel().sendMessage("Please include valid days of the week when entering your string. (MON, TUE, WED, THU, FRI, SAT, SUN)");
+                    return null;
+                }
                 time = s.substring(4);
             }
             else {
