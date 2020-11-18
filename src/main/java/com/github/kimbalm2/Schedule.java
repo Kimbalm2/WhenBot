@@ -1,8 +1,13 @@
 package com.github.kimbalm2;
 
+import org.javacord.api.event.message.MessageCreateEvent;
+
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+
 
 /*
 * Days of the week are numbered starting with Sunday = 0, ending with Saturday = 6
@@ -23,11 +28,25 @@ public class Schedule {
             dayMap.put(strArray[i],i);
         }
     }
-
-    public void insert (String day, String time){
-        if(isValid(time))
-        week[dayMap.get(day)].add(time);
+    //used by the intersection algorithm
+    public void insert(String day, String time){
+        if(isValid(time)) {
+            week[dayMap.get(day)].add(time);
+        }
     }
+    //used to store new times in new schedules or add times to an existing schedule
+    public void insert (String day, String time, MessageCreateEvent event){
+        if(isValid(time)) {
+            week[dayMap.get(day)].add(time);
+        }
+        else{
+            event.getChannel().sendMessage("Invalid format for the following time: " + time +
+                    "\n24 hour time is required and must be defined like the following hh:mm-hh:mm\n" +
+                    "Please correct the error and use !addTimes to add them to your schedule.");
+
+        }
+    }
+
     public void remove (String day, String time){
         if(week[dayMap.get(day)].contains(time)) {
             week[dayMap.get(day)].remove(time);
@@ -39,6 +58,7 @@ public class Schedule {
     }
 
     public void replaceTimes (String day, ArrayList<String> times){
+
         week[dayMap.get(day)] = times;
         sortSchedule();
     }
@@ -64,8 +84,14 @@ public class Schedule {
         }
     }
     //TODO: implement a time checker
-    private boolean isValid (String time){
-        return true;
+    public boolean isValid (String time){
+        try {
+            LocalTime.parse(time);
+            return true;
+        } catch (DateTimeParseException | NullPointerException e) {
+            System.out.println("Invalid time string: " + time);
+            return false;
+        }
     }
 
 
