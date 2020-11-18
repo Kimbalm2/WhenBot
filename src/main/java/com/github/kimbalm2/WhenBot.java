@@ -3,8 +3,8 @@ package com.github.kimbalm2;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.MessageBuilder;
+import org.javacord.api.entity.message.MessageDecoration;
 import org.javacord.api.entity.user.User;
-import org.javacord.api.event.Event;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.io.File;
@@ -25,6 +25,7 @@ public class WhenBot {
     private static final String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT", "SUN"};
 
     public static void main(String[] args) {
+        DiscordApi api;
         String token = "";
         try {
             token = getToken();
@@ -33,7 +34,14 @@ public class WhenBot {
             System.out.println("The token file could not be read. Please contact discord bot admins for the token.");
             System.exit(0);
         }
-        DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
+
+        try {
+            api = new DiscordApiBuilder().setToken(token).login().join();
+        }
+        catch (Exception e){
+            System.out.printf("ERROR: %s%n", e.getMessage());
+            throw e;
+        }
         // TODO
         api.addMessageCreateListener(WhenBot::onMessageCreate);
         // Add a listener which answers with "Pong!" if someone writes "!ping"
@@ -43,7 +51,8 @@ public class WhenBot {
             }
         });
         // Print the invite url of your bot
-        System.out.println("You can invite the bot by using the following url: " + api.createBotInvite());
+        //System.out.println("You can invite the bot by using the following url: " + api.createBotInvite());
+        System.out.println("Returned from the api");
     }
 
     //load token from file
@@ -92,26 +101,46 @@ public class WhenBot {
 
     private static void execHelp(MessageCreateEvent event){
         new MessageBuilder()
-                .append("when: This command will output all of the free times that X users share.\n" +
-                        "Usage:  !when user1 user2 userX")
+                .append("When:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   This command will output all of the free times that users share.\n")
+                .append("Usage:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   !when user1 user2 userX")
                 .appendNewLine()
-                .append("setSchedule: Create your new weekly set of free times. Time format is 24 hour time. Days are shortened to the first three letters.\n" +
-                        "Format: !setSchedule DAY-HH:mm-HH:mm,HH:mm-HH:mm,DAY-HH:mm-HH:mm\n"+
-                        "Usage: !setSchedule MON-19:00-21:00,09:00-11:00,TUE-19:00-21:00,THU-19:00-21:00,")
                 .appendNewLine()
-                .append("update: Allows you to update the input day's set of free times. " +
-                        "Note this will overwrite the whole schedule for the days entered.  " +
-                        "Use addTimes or removeTimes if you want to make small changes to a single day.\n" +
-                        "Usage: !update WED-04:00-05:00,TUE-19:00-20:00")
+                .append("Set Schedule:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   Create your new weekly set of free times. Time format is 24 hour time. Days are shortened to the first three letters.\n")
+                .append("Format:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   !setSchedule DAY-HH:mm-HH:mm,HH:mm-HH:mm,DAY-HH:mm-HH:mm\n")
+                .append("Usage:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   !setSchedule ")
+                .append("MON-19:00-21:00,09:00-11:00,TUE-19:00-21:00,THU-19:00-21:00")
                 .appendNewLine()
-                .append("Schedule: Will output the input user's set of free times. if no user is input it will output your schedule.\n" +
-                        "Usage: !schedule userName")
                 .appendNewLine()
-                .append("addTimes: Add free times to DAY\n" +
-                        "Usage: !addTimes SAT 09:00-12:00,17:00-19:00")
+                .append("Update:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   Allows you to update the input day's set of free times. ")
+                .append("Note this will overwrite the whole schedule for the days entered. ")
+                .append("Use addTimes or removeTimes if you want to make small changes to a single day.\n")
+                .append("Usage:",MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   !update WED-04:00-05:00,TUE-19:00-20:00")
                 .appendNewLine()
-                .append("removeTimes: remove free times from DAY\n" +
-                        "Usage: !removeTimes SAT 09:00-12:00,17:00-19:00")
+                .appendNewLine()
+                .append("Schedule:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   Outputs the user's set of free times. If no user is input it will display your schedule.\n")
+                .append("Usage:",MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   !schedule userName")
+                .appendNewLine()
+                .appendNewLine()
+                .append("Add Times:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   Add free times to a day.\n")
+                .append("Usage:",MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   !addTimes SAT 09:00-12:00,17:00-19:00")
+                .appendNewLine()
+                .appendNewLine()
+                .append("Remove Times:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   Remove free times from day.\n")
+                .append("Usage:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                .append("   !removeTimes SAT 09:00-12:00,17:00-19:00")
+                .appendNewLine()
                 .appendNewLine()
                 .send(event.getChannel());
     }
@@ -155,7 +184,7 @@ public class WhenBot {
             }
             userSchedule = userSchedules.getUserSchedule(discriminatedName);
             for(int i = 2; i < args.length; i++){
-                userSchedule.insert(day,args[i]);
+                userSchedule.insert(day, args[i], event);
             }
             userSchedule.sortSchedule();
             userSchedules.updateUserSchedule(discriminatedName, userSchedule);
@@ -358,7 +387,7 @@ public class WhenBot {
             else {
                 time = s;
             }
-            tempSchedule.insert(day, time);
+            tempSchedule.insert(day, time, event);
         }
         tempSchedule.sortSchedule();
         return tempSchedule;
