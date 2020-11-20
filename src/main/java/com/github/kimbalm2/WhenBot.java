@@ -110,10 +110,10 @@ public class WhenBot {
                 .append("Set Schedule:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
                 .append("   Create your new weekly set of free times. Time format is 24 hour time. Days are shortened to the first three letters.\n")
                 .append("Format:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
-                .append("   !setSchedule DAY-HH:mm-HH:mm,HH:mm-HH:mm,DAY-HH:mm-HH:mm\n")
+                .append("   !setSchedule DAY HH:mm-HH:mm,HH:mm-HH:mm,DAY HH:mm-HH:mm\n")
                 .append("Usage:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
                 .append("   !setSchedule ")
-                .append("MON-19:00-21:00,09:00-11:00,TUE-19:00-21:00,THU-19:00-21:00")
+                .append("MON 19:00-21:00,09:00-11:00,TUE 19:00-21:00,THU 19:00-21:00, SAT 09:00-10:00")
                 .appendNewLine()
                 .appendNewLine()
                 .append("Update:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
@@ -265,6 +265,7 @@ public class WhenBot {
         //MON-hh:mm-hh:mm,TUE-hh:mm-hh:mm,WED-hh:mm-hh:mm,THU-hh:mm-hh:mm,FRI-hh:mm-hh:mm,SAT-hh:mm-hh:mm,SUN-hh:mm-hh:mm
         Schedule tempSchedule = scheduleBuilder(content, event);
         if (tempSchedule == null){
+            event.getChannel().sendMessage("Failed to create a Schedule please try again");
             return;
         }
         userSchedules.adduser(event.getMessageAuthor().getDiscriminatedName(), tempSchedule);
@@ -304,8 +305,10 @@ public class WhenBot {
 
     private static void execUpdate(MessageCreateEvent event, String content){
         Schedule tempSchedule = scheduleBuilder(content, event);
-        if (tempSchedule == null)
-            tempSchedule = new Schedule();
+        if (tempSchedule == null){
+            event.getChannel().sendMessage("Failed to create a Schedule please try again");
+            return;
+        }
         String id = event.getMessageAuthor().getDiscriminatedName();
         if(!userSchedules.contains(event.getMessageAuthor().getDiscriminatedName())){
             userSchedules.adduser(id,tempSchedule);
@@ -369,7 +372,7 @@ public class WhenBot {
         if (args != null)
         content = args[1];
         else{
-            event.getChannel().sendMessage("Please include at least one DAY and at least one time, for example:!addTimes MON-09:00-10:00");
+            event.getChannel().sendMessage("Please include at least one DAY and at least one time after the command, for example:!setSchedule MON 09:00-10:00");
             return null;
         }
         varList = content.split(",");
@@ -378,22 +381,30 @@ public class WhenBot {
             //determine if we are dealing with a new day or still in the current day.
             if(isDay(s.substring(0,3))){
                 day = s.substring(0, 3);
-                if (!isDay(day)){
-                    event.getChannel().sendMessage("Please include valid days of the week when entering your string. (MON, TUE, WED, THU, FRI, SAT, SUN)");
-                    return null;
-                }
                 time = s.substring(4);
             }
             else {
                 time = s;
+
             }
-            tempSchedule.insert(day, time, event);
+            if(!tempSchedule.isValid(time)){
+                event.getChannel().sendMessage("Error, invalid format for input time: " + time);
+                return null;
+            }
+            else if(!isDay(day)){
+                event.getChannel().sendMessage("Error, please include valid days of the week when entering your string. (MON, TUE, WED, THU, FRI, SAT, SUN)");
+                return null;
+            }
+            else {
+                tempSchedule.insert(day, time, event);
+            }
         }
         tempSchedule.sortSchedule();
         return tempSchedule;
     }
 
     private static String[] getArgs(String content) {
+        content = content.trim();
         String[] args = content.split(" ");
         if (args.length > 1) {
            return args;
