@@ -85,11 +85,18 @@ public class Schedule {
     }
     //TODO: implement a time checker
     public boolean isValid (String time){
+        String times[] = time.split("-");
         try {
-            LocalTime.parse(time);
-            return true;
+            LocalTime.parse(times[0]);
+            LocalTime.parse(times[1]);
+            if(times[0].compareTo(times[1]) < 0){
+                return true;
+            }
+            else{
+                return false;
+            }
         } catch (DateTimeParseException | NullPointerException e) {
-            System.out.println("Invalid time string: " + time);
+            //System.out.println("Invalid time string: " + time);
             return false;
         }
     }
