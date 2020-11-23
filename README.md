@@ -2,7 +2,7 @@
 A Discord bot that keeps track of when your freinds are available. Whether you use it to find time to game or use it to find time to meet up, ask WhenBot for their schedule.
 
 ## Motivation
-My friends and I work very different schedules so it can be hard to find times where we are all free. One works for an Airline, so his free time can change randomly. Another works at a restaurant so his schedule will change every week. and I work a typical 9-5. I wanted to make something we could use that would keep track of our availabilty, that way we can stop blasting our group chats and just ask my bot.
+My friends and I work very different schedules so it can be hard to find times where we are all free. I wanted to make something we could use that would keep track of our availabilty, that way we can stop blasting our group chats and just ask my bot.
 
 ## How to use?
 - Invite my bot to your server: (Comming Soon!)
@@ -17,8 +17,8 @@ My friends and I work very different schedules so it can be hard to find times w
 
 <b>!setSchedule:</b> Create a new availability schedule by listing all the times you are available.
 
-    Format: !setSchedule DAY-HH:mm-HH:mm,HH:mm-HH:mm,DAY-HH:mm-HH:mm
-    Example: !setSchedule MON-19:00-21:00,09:00-11:00,TUE-19:00-21:00,THU-19:00-21:00
+    Format: !setSchedule DAY HH:mm-HH:mm,HH:mm-HH:mm DAY HH:mm-HH:mm
+    Example: !setSchedule MON 19:00-21:00,09:00-11:00,TUE 19:00-21:00,THU 19:00-21:00
 
 <b>!schedule:</b> Will Display the input user's schedule. if no user is input it will output your schedule.
 
