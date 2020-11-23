@@ -365,41 +365,36 @@ public class WhenBot {
         Schedule tempSchedule = new Schedule();
         String day = "";
         String time;
-        String[] varList;
+        String[] timeList;
         String[] args;
-
         args = getArgs(content);
-        if (args != null)
-        content = args[1];
-        else{
+
+        if (args == null){
             event.getChannel().sendMessage("Please include at least one DAY and at least one time after the command, for example:!setSchedule MON 09:00-10:00");
             return null;
         }
-        varList = content.split(",");
-
-        for (String s : varList) {
-            //determine if we are dealing with a new day or still in the current day.
-            if(isDay(s.substring(0,3))){
-                day = s.substring(0, 3);
-                time = s.substring(4);
-            }
-            else {
-                time = s;
-
-            }
-            if(!tempSchedule.isValid(time)){
-                event.getChannel().sendMessage("Error, invalid format for input time: " + time);
+        for(int i = 1; i < args.length; i++){
+            if(!isDay(args[i]) && !isTimeList(args[i])){
+                event.getChannel().sendMessage("Unknown command input: " + args[i]);
                 return null;
             }
-            else if(!isDay(day)){
-                event.getChannel().sendMessage("Error, please include valid days of the week when entering your string. (MON, TUE, WED, THU, FRI, SAT, SUN)");
-                return null;
+            if(isDay(args[i])){
+                day = args[i];
             }
-            else {
-                tempSchedule.insert(day, time, event);
+            else if (isTimeList(args[i])){
+                timeList = args[i].split(",");
+                for (String s : timeList){
+                    time = s;
+                    if(tempSchedule.isValid(time)){
+                      tempSchedule.insert(day,time);
+                    }
+                    else{
+                        event.getChannel().sendMessage("Error, invalid format for input time: " + time);
+                        return null;
+                    }
+                }
             }
         }
-        tempSchedule.sortSchedule();
         return tempSchedule;
     }
 
@@ -423,6 +418,10 @@ public class WhenBot {
     //TODO: add styling and review wording.
     private static String scheduleMessageBuilder(String userName, Schedule schedule){
         return (userName + "'s free time schedule:" + schedule.printSchedule());
+    }
+
+    public static boolean isTimeList(String time){
+        return time.matches("(\\d{2}:\\d{2}-\\d{2}:\\d{2})(,\\d{2}:\\d{2}-\\d{2}:\\d{2})*");
     }
 
 
