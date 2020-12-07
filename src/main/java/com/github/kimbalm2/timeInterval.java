@@ -24,7 +24,7 @@ public class timeInterval {
    }
 
    public String toString(){
-      return s + ":" + e;
+      return s + "-" + e;
    }
    //Now, if arr1[i] has smallest endpoint, it can only intersect with arr2[j]. Similarly, if arr2[j] has smallest endpoint, it can only intersect with arr1[i]. If intersection occurs, find the intersecting segment.
    //[l, r] will be the intersecting segment iff l <= r, where l = max(arr1[i][0], arr2[j][0]) and r = min(arr1[i][1], arr2[j][1]).
@@ -35,11 +35,21 @@ public class timeInterval {
       return l <= r;
    }
 
-   public timeInterval getIntersection(timeInterval t2){
+   public timeInterval getIntersection(timeInterval t2) {
       int l = Integer.max(start, t2.start);
       int r = Integer.max(end, t2.end);
-      return new timeInterval(l,r);
+      String startTime;
+      String endTime;
+      if (l == start) {
+         startTime = this.s;
+      } else {
+         startTime = t2.s;
+      }
+      if (r == end) {
+         endTime = e;
+      } else {
+         endTime = t2.e;
+      }
+      return new timeInterval(startTime, endTime);
    }
-
-
 }
