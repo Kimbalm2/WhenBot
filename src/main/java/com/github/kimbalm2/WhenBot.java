@@ -159,11 +159,16 @@ public class WhenBot {
                 return;
             }
             userSchedule = userSchedules.getUserSchedule(discriminatedName);
-            for(int i = 2; i < args.length; i++){
-                userSchedule.remove(day,args[i]);
+            if(userSchedule != null) {
+                for (int i = 2; i < args.length; i++) {
+                    userSchedule.remove(day, args[i]);
+                }
+                userSchedule.sortSchedule();
+                userSchedules.updateUserSchedule(discriminatedName, userSchedule);
             }
-            userSchedule.sortSchedule();
-            userSchedules.updateUserSchedule(discriminatedName, userSchedule);
+            else{
+                event.getChannel().sendMessage("Could not find a schedule, use setSchedule if this is your first time creating one.");
+            }
         }
         else{
             event.getChannel().sendMessage("Please include the DAY and at least one time, for example: !removeTimes MON 09:00-10:00");
@@ -183,11 +188,16 @@ public class WhenBot {
                 return;
             }
             userSchedule = userSchedules.getUserSchedule(discriminatedName);
-            for(int i = 2; i < args.length; i++){
-                userSchedule.insert(day, args[i], event);
+            if(userSchedule != null) {
+                for (int i = 2; i < args.length; i++) {
+                    userSchedule.insert(day, args[i], event);
+                }
+                userSchedule.sortSchedule();
+                userSchedules.updateUserSchedule(discriminatedName, userSchedule);
             }
-            userSchedule.sortSchedule();
-            userSchedules.updateUserSchedule(discriminatedName, userSchedule);
+            else{
+                event.getChannel().sendMessage("Could not find a schedule, use setSchedule if this is your first time creating one.");
+            }
         }
         else{
             event.getChannel().sendMessage("Please include the DAY and at least one time, for example:!addTimes MON 09:00-10:00");
@@ -198,7 +208,6 @@ public class WhenBot {
     // Command: !When {user1}
     // Outputs all of the free times that the command invoker and {user} share.
     //get both user's schedules
-
     private static void execWhen(MessageCreateEvent event, String content){
         String[] userList;
         Schedule sameFreeTimes = null;
@@ -223,7 +232,7 @@ public class WhenBot {
                 if(usersCollection.size() > 0) {
                     for (User u : usersCollection) {
                         otherUserDisplayName = u.getDisplayName(event.getServer().get());//TODO: fix warning
-                        if(otherUserDisplayName.equals(otherUser) && userSchedules.contains(otherUserDisplayName)) {
+                        if(otherUserDisplayName.equals(otherUser) && userSchedules.contains(u.getDiscriminatedName())) {
                             otherUserSchedule = userSchedules.getUserSchedule(u.getDiscriminatedName());
                         }
                         else {
@@ -265,7 +274,8 @@ public class WhenBot {
         //MON-hh:mm-hh:mm,TUE-hh:mm-hh:mm,WED-hh:mm-hh:mm,THU-hh:mm-hh:mm,FRI-hh:mm-hh:mm,SAT-hh:mm-hh:mm,SUN-hh:mm-hh:mm
         Schedule tempSchedule = scheduleBuilder(content, event);
         if (tempSchedule == null){
-            event.getChannel().sendMessage("Failed to create a Schedule please try again");
+            event.getChannel().sendMessage("Example Usage: !setSchedule MON 19:00-21:00,09:00-11:00,TUE 19:00-21:00");
+            event.getChannel().sendMessage("Failed to create a Schedule please try again.");
             return;
         }
         userSchedules.adduser(event.getMessageAuthor().getDiscriminatedName(), tempSchedule);
@@ -306,6 +316,7 @@ public class WhenBot {
     private static void execUpdate(MessageCreateEvent event, String content){
         Schedule tempSchedule = scheduleBuilder(content, event);
         if (tempSchedule == null){
+            event.getChannel().sendMessage("Example Usage: !update MON 19:00-21:00,09:00-11:00");
             event.getChannel().sendMessage("Failed to create a Schedule please try again");
             return;
         }
@@ -370,12 +381,16 @@ public class WhenBot {
         args = getArgs(content);
 
         if (args == null){
-            event.getChannel().sendMessage("Please include at least one DAY and at least one time after the command, for example:!setSchedule MON 09:00-10:00");
+            //incorrect parameters after !setSchedule.
+            //Example Usage: !setSchedule MON 19:00-21:00,09:00-11:00,TUE 19:00-21:00
+            event.getChannel().sendMessage("Incorrect or missing input after command");
+
             return null;
         }
         for(int i = 1; i < args.length; i++){
             if(!isDay(args[i]) && !isTimeList(args[i])){
                 event.getChannel().sendMessage("Unknown command input: " + args[i]);
+
                 return null;
             }
             if(isDay(args[i])){
@@ -417,7 +432,7 @@ public class WhenBot {
 
     //TODO: add styling and review wording.
     private static String scheduleMessageBuilder(String userName, Schedule schedule){
-        return (userName + "'s free time schedule:" + schedule.printSchedule());
+        return (userName + "'s free time schedule:\n" + schedule.printSchedule());
     }
 
     public static boolean isTimeList(String time){
