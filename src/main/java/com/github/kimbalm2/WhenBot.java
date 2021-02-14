@@ -217,13 +217,24 @@ public class WhenBot {
         Collection<User> usersCollection;
         String[] args;
         args = getArgs(content);
-        if (args != null)
-            content = args[1];
+
+
+        if(!userSchedules.contains(event.getMessageAuthor().getDiscriminatedName())){
+            event.getChannel().sendMessage("You do not have a free time schedule set. Please set a schedule before using this command.");
+            return;
+        }
+
+        if (args != null) {
+            userList = new String[args.length-1];
+            for (int i = 1; i < args.length; i++) {
+                userList[i-1] = args[i];
+            }
+        }
         else{
             event.getChannel().sendMessage("No user entered, please enter one or more users after the command e.g.'!when user1 user2 etc.'");
             return;
         }
-        userList = content.split(" ");
+        //userList = content.split(" ");
         //if we are only comparing with on other person.
         if(userList.length >= 1){
             for (String otherUser: userList) {
@@ -242,7 +253,6 @@ public class WhenBot {
                     }
                 }
                 else{
-                    //TODO: send error message to server
                     event.getChannel().sendMessage("Can't find a user with the username " + otherUser);
                     return;
                 }
@@ -254,7 +264,7 @@ public class WhenBot {
                 }
                 else {
                     //TODO: send error message to server.
-                    event.getChannel().sendMessage("You do no have a free time schedule set. Please set a schedule before using this command.");
+                    event.getChannel().sendMessage("You do not have a free time schedule set. Please set a schedule before using this command.");
                     return;
                 }
                 sameFreeTimes = findScheduleIntersection(superUserSchedule,otherUserSchedule);
