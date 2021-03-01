@@ -13,7 +13,7 @@ import java.util.HashMap;
 * Days of the week are numbered starting with Sunday = 0, ending with Saturday = 6
 * */
 public class Schedule {
-    public final String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT", "SUN"};
+    public final String[] strArray = {"MON","TUE","WED","THU","FRI", "SAT", "SUN"};
     private final static HashMap<String,Integer> dayMap = new HashMap<>();//maps the weekday strings to an index in the week arrayList
     private final ArrayList<String>[] week = new ArrayList[7]; //array of array lists uses dayMap to index them in
 

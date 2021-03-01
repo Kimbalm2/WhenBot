@@ -22,7 +22,7 @@ import java.util.Scanner;
 public class WhenBot {
     //key = discord userID
     private static userScheduleMap userSchedules = new userScheduleMap();
-    private static final String[] strArray = {"MON","TUE","WED","THUR","FRI", "SAT", "SUN"};
+    private static final String[] strArray = {"MON","TUE","WED","THU","FRI", "SAT", "SUN"};
 
     public static void main(String[] args) {
         DiscordApi api;
@@ -110,10 +110,10 @@ public class WhenBot {
                 .append("Set Schedule:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
                 .append("   Create your new weekly set of free times. Time format is 24 hour time. Days are shortened to the first three letters.\n")
                 .append("Format:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
-                .append("   !setSchedule DAY HH:mm-HH:mm,HH:mm-HH:mm,DAY HH:mm-HH:mm\n")
+                .append("   !setSchedule DAY HH:mm-HH:mm,HH:mm-HH:mm DAY HH:mm-HH:mm\n")
                 .append("Usage:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
                 .append("   !setSchedule ")
-                .append("MON 19:00-21:00,09:00-11:00,TUE 19:00-21:00,THU 19:00-21:00, SAT 09:00-10:00")
+                .append("MON 19:00-21:00,09:00-11:00 TUE 19:00-21:00 THU 19:00-21:00, SAT 09:00-10:00")
                 .appendNewLine()
                 .appendNewLine()
                 .append("Update:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
@@ -121,7 +121,7 @@ public class WhenBot {
                 .append("Note this will overwrite the whole schedule for the days entered. ")
                 .append("Use addTimes or removeTimes if you want to make small changes to a single day.\n")
                 .append("Usage:",MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
-                .append("   !update WED-04:00-05:00,TUE-19:00-20:00")
+                .append("   !update WED-04:00-05:00 TUE-19:00-20:00")
                 .appendNewLine()
                 .appendNewLine()
                 .append("Schedule:", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
@@ -171,7 +171,7 @@ public class WhenBot {
             }
         }
         else{
-            event.getChannel().sendMessage("Please include the DAY and at least one time, for example: !removeTimes MON 09:00-10:00");
+            event.getChannel().sendMessage("Please include the DAY and at least one time, for example: !removeTimes MON 09:00-10:00,13:00-14:00");
         }
     }
     //!addTimes DAY hh:mm-hh:mm,hh:mm-hh:mm
@@ -200,7 +200,7 @@ public class WhenBot {
             }
         }
         else{
-            event.getChannel().sendMessage("Please include the DAY and at least one time, for example:!addTimes MON 09:00-10:00");
+            event.getChannel().sendMessage("Please include the DAY and at least one time, for example:!addTimes MON 09:00-10:00,13:00-14:00");
         }
 
     }
@@ -278,13 +278,13 @@ public class WhenBot {
     }
 
     // Command: !setSchedule
-    // input format are ranges DAYhh:mm-hh:mm,hh:mm-hh:mm,DAYhh:mm,hh:mm-hh:mm
+    // input format are ranges DAY hh:mm-hh:mm,hh:mm-hh:mm,DAY hh:mm,hh:mm-hh:mm
     // Prompts the user to create their weekly schedule
     private static void execSetSchedule(MessageCreateEvent event, String content){
-        //MON-hh:mm-hh:mm,TUE-hh:mm-hh:mm,WED-hh:mm-hh:mm,THU-hh:mm-hh:mm,FRI-hh:mm-hh:mm,SAT-hh:mm-hh:mm,SUN-hh:mm-hh:mm
+        //MON-hh:mm-hh:mmn TUE-hh:mm-hh:mm WED-hh:mm-hh:mm THU-hh:mm-hh:mm FRI-hh:mm-hh:mm SAT-hh:mm-hh:mm SUN-hh:mm-hh:mm
         Schedule tempSchedule = scheduleBuilder(content, event);
         if (tempSchedule == null){
-            event.getChannel().sendMessage("Example Usage: !setSchedule MON 19:00-21:00,09:00-11:00,TUE 19:00-21:00");
+            event.getChannel().sendMessage("Example Usage: !setSchedule MON 19:00-21:00,09:00-11:00 TUE 19:00-21:00");
             event.getChannel().sendMessage("Failed to create a Schedule please try again.");
             return;
         }
@@ -316,10 +316,20 @@ public class WhenBot {
                     }
                 }
             }
+            else{
+              event.getChannel().sendMessage("Could not find a user with the name " + user + " in the server list.");
+            }
         }
         else {
-            msg = scheduleMessageBuilder(event.getMessageAuthor().getDisplayName(),userSchedules.getUserSchedule(event.getMessageAuthor().getDiscriminatedName()));
-            event.getChannel().sendMessage(msg);
+            //output the super user scheduel
+            if(userSchedules.getUserSchedule(event.getMessageAuthor().getDiscriminatedName()) != null) {
+                msg = scheduleMessageBuilder(event.getMessageAuthor().getDisplayName(), userSchedules.getUserSchedule(event.getMessageAuthor().getDiscriminatedName()));
+                event.getChannel().sendMessage(msg);
+            }
+            else{
+                event.getChannel().sendMessage("You do not have a schedule set to set use the command !setSchedule.");
+            }
+
         }
     }
 
@@ -392,7 +402,7 @@ public class WhenBot {
 
         if (args == null){
             //incorrect parameters after !setSchedule.
-            //Example Usage: !setSchedule MON 19:00-21:00,09:00-11:00,TUE 19:00-21:00
+            //Example Usage: !setSchedule MON 19:00-21:00,09:00-11:00 TUE 19:00-21:00
             event.getChannel().sendMessage("Incorrect or missing input after command");
 
             return null;
